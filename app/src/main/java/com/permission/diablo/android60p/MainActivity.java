@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
@@ -30,6 +31,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static final int REQUEST_PERMISSION_SENSORS_CODE = 7;
     private static final int REQUEST_PERMISSION_SMS_CODE = 8;
     private static final int REQUEST_PERMISSION_STORAGE_CODE = 9;
+    private static final int REQUEST_PERMISSION_SAW_CODE = 10;
+    private static final int REQUEST_PERMISSION_WRITE_SETTINGS_CODE = 11;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,9 +99,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 temp = REQUEST_PERMISSION_STORAGE_CODE;
                 break;
             case R.id.btn_saw:
-                openCamera();
+                requestAlertWindowPermission();
                 break;
             case R.id.btn_writeSettings:
+                requestWriteSettings();
                 break;
             default:
                 break;
@@ -106,10 +110,22 @@ public class MainActivity extends Activity implements View.OnClickListener {
         requestPermissons(temp);
     }
 
+    private void requestWriteSettings() {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+        intent.setData(Uri.parse("package:" + getPackageName()));
+        startActivityForResult(intent, REQUEST_PERMISSION_WRITE_SETTINGS_CODE);
+    }
+
+    private void requestAlertWindowPermission() {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+        intent.setData(Uri.parse("package:" + getPackageName()));
+        startActivityForResult(intent, REQUEST_PERMISSION_SAW_CODE);
+    }
+
     //6.0以下系统自动授权
     @TargetApi(Build.VERSION_CODES.M)
     /**
-     * 权限请求
+     * 运行时权限请求
      */
     private void requestPermissons(int type) {
         switch (type) {
@@ -184,14 +200,23 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     useSMS();
                 }
                 break;
+            case REQUEST_PERMISSION_STORAGE_CODE:
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSION_STORAGE_CODE);
+                    return;
+                } else {
+                    System.out.println("存储组权限已经授权:>>>DoNext!");
+                    useSdCard();
+                }
+                break;
             default:
+                System.out.println("未定义运行时权限请求码！");
                 break;
         }
     }
 
-
     /**
-     * 权限请求处理
+     * 运行时权限请求处理
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -267,6 +292,17 @@ public class MainActivity extends Activity implements View.OnClickListener {
             } else {
                 System.out.println("短信组权限授权失败!");
             }
+        } else if (requestCode == REQUEST_PERMISSION_STORAGE_CODE) {
+            int grantResult = grantResults[0];
+            boolean granted = grantResult == PackageManager.PERMISSION_GRANTED;
+            if (granted) {
+                System.out.println("存储组权限授权成功:>>>DoNext!");
+                useSdCard();
+            } else {
+                System.out.println("存储组权限授权失败!");
+            }
+        } else {
+            System.out.println("运行时权限请求码不对！");
         }
     }
 
@@ -303,5 +339,28 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private void useSMS() {
 
+    }
+
+    private void useSdCard() {
+
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_PERMISSION_SAW_CODE) {
+            if (Settings.canDrawOverlays(this)) {
+                System.out.println("权限SYSTEM_ALERT_WINDOW授权成功:==>DoNext！");
+            } else {
+                System.out.println("权限SYSTEM_ALERT_WINDOW失败！");
+            }
+        } else if (requestCode == REQUEST_PERMISSION_WRITE_SETTINGS_CODE) {
+            if (Settings.System.canWrite(this)) {
+                System.out.println("权限WRITE_SETTINGS授权成功:==>DoNext！");
+            } else {
+                System.out.println("权限SYSTEM_ALERT_WINDOW失败！");
+            }
+        }
     }
 }
