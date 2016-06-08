@@ -9,125 +9,35 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
-import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements View.OnClickListener {
+/**
+ * Created by Diablo on 16/6/8.
+ */
+public class BaseActivity extends Activity {
 
-    private static final int REQUEST_PERMISSION_CALENDAR_CODE = 0x101;
-    private static final int REQUEST_PERMISSION_CAMERA_CODE = 0x102;
-    private static final int REQUEST_PERMISSION_CONTACTS_CODE = 0x103;
-    private static final int REQUEST_PERMISSION_LOCATION_CODE = 0x104;
-    private static final int REQUEST_PERMISSION_MICROPHONE_CODE = 0x105;
-    private static final int REQUEST_PERMISSION_PHONE_CODE = 0x106;
-    private static final int REQUEST_PERMISSION_SENSORS_CODE = 0x107;
-    private static final int REQUEST_PERMISSION_SMS_CODE = 0x108;
-    private static final int REQUEST_PERMISSION_STORAGE_CODE = 0x109;
-    private static final int REQUEST_PERMISSION_SAW_CODE = 0x110;
-    private static final int REQUEST_PERMISSION_WRITE_SETTINGS_CODE = 0x111;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ininViews();
-    }
-
-    private void ininViews() {
-        Button calendar = (Button) findViewById(R.id.btn_calendar);
-        calendar.setOnClickListener(this);
-        Button carmera = (Button) findViewById(R.id.btn_camera);
-        carmera.setOnClickListener(this);
-        Button contants = (Button) findViewById(R.id.btn_Contacts);
-        contants.setOnClickListener(this);
-        Button location = (Button) findViewById(R.id.btn_Location);
-        location.setOnClickListener(this);
-        Button microPhone = (Button) findViewById(R.id.btn_MicroPhone);
-        microPhone.setOnClickListener(this);
-        Button phone = (Button) findViewById(R.id.btn_phone);
-        phone.setOnClickListener(this);
-        Button sensord = (Button) findViewById(R.id.btn_Sensors);
-        sensord.setOnClickListener(this);
-        Button sms = (Button) findViewById(R.id.btn_sms);
-        sms.setOnClickListener(this);
-        Button storage = (Button) findViewById(R.id.btn_Storage);
-        storage.setOnClickListener(this);
-        Button saw = (Button) findViewById(R.id.btn_saw);
-        saw.setOnClickListener(this);
-        Button writeSet = (Button) findViewById(R.id.btn_writeSettings);
-        writeSet.setOnClickListener(this);
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    @Override
-    public void onClick(View v) {
-        int temp = 0;
-        switch (v.getId()) {
-            case R.id.btn_calendar:
-                temp = REQUEST_PERMISSION_CALENDAR_CODE;
-                break;
-            case R.id.btn_camera:
-                temp = REQUEST_PERMISSION_CAMERA_CODE;
-                break;
-            case R.id.btn_Contacts:
-                temp = REQUEST_PERMISSION_CONTACTS_CODE;
-                break;
-            case R.id.btn_Location:
-                temp = REQUEST_PERMISSION_LOCATION_CODE;
-                break;
-            case R.id.btn_MicroPhone:
-                temp = REQUEST_PERMISSION_MICROPHONE_CODE;
-                break;
-            case R.id.btn_phone:
-                temp = REQUEST_PERMISSION_PHONE_CODE;
-                break;
-            case R.id.btn_Sensors:
-                temp = REQUEST_PERMISSION_SENSORS_CODE;
-                break;
-            case R.id.btn_sms:
-                temp = REQUEST_PERMISSION_SMS_CODE;
-                break;
-            case R.id.btn_Storage:
-                temp = REQUEST_PERMISSION_STORAGE_CODE;
-                break;
-            case R.id.btn_saw:
-                requestAlertWindowPermission();
-                break;
-            case R.id.btn_writeSettings:
-                requestWriteSettings();
-                break;
-            default:
-                break;
-        }
-        if (temp >= REQUEST_PERMISSION_CALENDAR_CODE && temp <= REQUEST_PERMISSION_STORAGE_CODE) {
-            requestRunTimePermissons(temp);
-        }
-    }
-
-    private void requestWriteSettings() {
-        Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-        intent.setData(Uri.parse("package:" + getPackageName()));
-        startActivityForResult(intent, REQUEST_PERMISSION_WRITE_SETTINGS_CODE);
-    }
-
-    private void requestAlertWindowPermission() {
-        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-        intent.setData(Uri.parse("package:" + getPackageName()));
-        startActivityForResult(intent, REQUEST_PERMISSION_SAW_CODE);
-    }
+    public static final int REQUEST_PERMISSION_CALENDAR_CODE = 0x1;
+    public static final int REQUEST_PERMISSION_CAMERA_CODE = 0x2;
+    public static final int REQUEST_PERMISSION_CONTACTS_CODE = 0x3;
+    public static final int REQUEST_PERMISSION_LOCATION_CODE = 0x4;
+    public static final int REQUEST_PERMISSION_MICROPHONE_CODE = 0x5;
+    public static final int REQUEST_PERMISSION_PHONE_CODE = 0x6;
+    public static final int REQUEST_PERMISSION_SENSORS_CODE = 0x7;
+    public static final int REQUEST_PERMISSION_SMS_CODE = 0x8;
+    public static final int REQUEST_PERMISSION_STORAGE_CODE = 0x9;
+    public static final int REQUEST_PERMISSION_SAW_CODE = 0x10;
+    public static final int REQUEST_PERMISSION_WRITE_SETTINGS_CODE = 0x11;
 
     //6.0以下系统自动授权
     @TargetApi(Build.VERSION_CODES.M)
     /**
      * 运行时权限请求
      */
-    private void requestRunTimePermissons(int type) {
+    public void requestRunTimePermissons(int type) {
         switch (type) {
             case REQUEST_PERMISSION_CALENDAR_CODE:
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
@@ -135,6 +45,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     return;
                 } else {
                     System.out.println("日历组权限已经授权:>>>DoNext!");
+                    readCalenda();
                 }
                 break;
             case REQUEST_PERMISSION_CAMERA_CODE:
@@ -160,7 +71,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_LOCATION_CODE);
                     return;
                 } else {
-                    System.out.println("定位组权限已经授权:>>>DoNext!");
+                    System.out.println("通讯录组权限已经授权:>>>DoNext!");
                     location();
                 }
                 break;
@@ -215,9 +126,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    /**
-     * 运行时权限请求处理
-     */
+    public void requestWriteSettings() {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+        intent.setData(Uri.parse("package:" + getPackageName()));
+        startActivityForResult(intent, REQUEST_PERMISSION_WRITE_SETTINGS_CODE);
+    }
+
+    public void requestAlertWindowPermission() {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+        intent.setData(Uri.parse("package:" + getPackageName()));
+        startActivityForResult(intent, REQUEST_PERMISSION_SAW_CODE);
+    }
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -266,6 +187,26 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_PERMISSION_SAW_CODE) {
+            if (Settings.canDrawOverlays(this)) {
+                System.out.println("权限SYSTEM_ALERT_WINDOW授权成功:==>DoNext！");
+            } else {
+                System.out.println("权限SYSTEM_ALERT_WINDOW失败！");
+            }
+        } else if (requestCode == REQUEST_PERMISSION_WRITE_SETTINGS_CODE) {
+            if (Settings.System.canWrite(this)) {
+                System.out.println("权限WRITE_SETTINGS授权成功:==>DoNext！");
+            } else {
+                System.out.println("权限SYSTEM_ALERT_WINDOW失败！");
+            }
+        }
+    }
+
+
     private void readCalenda() {
 
     }
@@ -273,7 +214,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private void openCamera() {
         Intent intent = new Intent();
         intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-        MainActivity.this.startActivityForResult(intent, 300);
+        this.startActivityForResult(intent, 300);
     }
 
     private void readContacts() {
@@ -282,7 +223,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         Cursor cur = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, str, null, null, null);
         int count = cur.getCount();
         cur.close();
-        Toast.makeText(MainActivity.this, String.format("发现%s条", count), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, String.format("发现%s条", count), Toast.LENGTH_SHORT).show();
     }
 
     private void location() {
@@ -309,22 +250,4 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_PERMISSION_SAW_CODE) {
-            if (Settings.canDrawOverlays(this)) {
-                System.out.println("权限SYSTEM_ALERT_WINDOW授权成功:==>DoNext！");
-            } else {
-                System.out.println("权限SYSTEM_ALERT_WINDOW失败！");
-            }
-        } else if (requestCode == REQUEST_PERMISSION_WRITE_SETTINGS_CODE) {
-            if (Settings.System.canWrite(this)) {
-                System.out.println("权限WRITE_SETTINGS授权成功:==>DoNext！");
-            } else {
-                System.out.println("权限SYSTEM_ALERT_WINDOW失败！");
-            }
-        }
-    }
 }
