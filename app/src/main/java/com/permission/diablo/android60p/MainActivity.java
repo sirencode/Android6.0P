@@ -32,11 +32,24 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private static final int REQUEST_PERMISSION_SAW_CODE = 0x110;
     private static final int REQUEST_PERMISSION_WRITE_SETTINGS_CODE = 0x111;
 
+    boolean phone_grated = false;
+
+    @TargetApi(Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ininViews();
+        //初始化调用时，注意回调方法里面的相关方法的使用，以及拒绝授权的处理。
+        //弹出权限请求窗口实际上调用了，onpause->onresume生命周期，注意生命周期里面方法的处理。
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_PERMISSION_CONTACTS_CODE);
+            return;
+        } else {
+            System.out.println("通讯录组权限已经授权:>>>DoNext!");
+            phone_grated = true;
+            readContacts();
+        }
     }
 
     private void ininViews() {
@@ -179,6 +192,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     return;
                 } else {
                     System.out.println("电话组权限已经授权:>>>DoNext!");
+                    phone_grated = true;
                     usePhone();
                 }
                 break;
@@ -260,6 +274,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 }
             } else {
                 System.out.println("权限授权失败!");
+                this.finish();
             }
         } else {
             System.out.println("运行时权限请求码不对！");
@@ -325,6 +340,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
             } else {
                 System.out.println("权限SYSTEM_ALERT_WINDOW失败！");
             }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (phone_grated) {
+            readContacts();
         }
     }
 }
