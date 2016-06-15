@@ -1,12 +1,18 @@
 #Android 6.0 权限适配问题
 
+##功能简介：
+###1.动态申请运行时权限。
+###2.动态申请特殊权限。
+###3.将申请权限代码封装成工具类，将处理代码统一在BaseActivity处理。
+###4.多组权限一起申请。
+
 ##1 权限分类：
-    1.1 一般权限，生命即可使用，无需做特殊处理。
-    1.2 特殊权限，需要动态授权。
-    1.3 危险权限，也成运行时权限，需要动态的在使用时授权，如果未授权直接使用会导致崩溃。
+###1.1 一般权限，生命即可使用，无需做特殊处理。
+###1.2 特殊权限，需要动态授权。
+###1.3 危险权限，也成运行时权限，需要动态的在使用时授权，如果未授权直接使用会导致崩溃。
 
 ##2 建议
-    2.1 添加权限时请分类添加，可分为一般权限，运行时权限和特殊权限
+###2.1 添加权限时请分类添加，可分为一般权限，运行时权限和特殊权限
         一般权限：
 	    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
@@ -33,11 +39,11 @@
         //STORAGE  存储组
         <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
         <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    2.2 处理要用到运行是权限或者特殊权限的方法时，尽量将方法写在Activity或者fragment里面。
-    2.3 设计时请设计好，当用户拒绝相关权限后的处理方式。
+###2.2 处理要用到运行是权限或者特殊权限的方法时，尽量将方法写在Activity或者fragment里面。
+###2.3 设计时请设计好，当用户拒绝相关权限后的处理方式。
 
 ##3 权限分类参考表
-    3.1 一般权限
+###3.1 一般权限
         ACCESS_LOCATION_EXTRA_COMMANDS
 		ACCESS_NETWORK_STATE
 		ACCESS_NOTIFICATION_POLICY
@@ -71,10 +77,10 @@
 		VIBRATE
 		WAKE_LOCK
 		WRITE_SYNC_SETTINGS
-    3.2 特殊权限
+###3.2 特殊权限
         SYSTEM_ALERT_WINDOW，设置悬浮窗，进行一些黑科技
 		WRITE_SETTINGS 修改系统设置
-    3.3 危险权限
+###3.3 危险权限
         Permission Group	Permissions
 		CALENDAR
 							READ_CALENDAR
