@@ -2,10 +2,8 @@ package com.permission.diablo.android60p;
 
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -13,24 +11,11 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements View.OnClickListener {
-
-    private static final int REQUEST_PERMISSION_CALENDAR_CODE = 0x101;
-    private static final int REQUEST_PERMISSION_CAMERA_CODE = 0x102;
-    private static final int REQUEST_PERMISSION_CONTACTS_CODE = 0x103;
-    private static final int REQUEST_PERMISSION_LOCATION_CODE = 0x104;
-    private static final int REQUEST_PERMISSION_MICROPHONE_CODE = 0x105;
-    private static final int REQUEST_PERMISSION_PHONE_CODE = 0x106;
-    private static final int REQUEST_PERMISSION_SENSORS_CODE = 0x107;
-    private static final int REQUEST_PERMISSION_SMS_CODE = 0x108;
-    private static final int REQUEST_PERMISSION_STORAGE_CODE = 0x109;
-    private static final int REQUEST_PERMISSION_SAW_CODE = 0x110;
-    private static final int REQUEST_PERMISSION_WRITE_SETTINGS_CODE = 0x111;
+public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     boolean phone_grated = false;
 
@@ -40,16 +25,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ininViews();
-        //初始化调用时，注意回调方法里面的相关方法的使用，以及拒绝授权的处理。
-        //弹出权限请求窗口实际上调用了，onpause->onresume生命周期，注意生命周期里面方法的处理。
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_PERMISSION_CONTACTS_CODE);
-            return;
-        } else {
-            System.out.println("通讯录组权限已经授权:>>>DoNext!");
-            phone_grated = true;
-            readContacts();
-        }
     }
 
     private void ininViews() {
@@ -83,31 +58,31 @@ public class MainActivity extends Activity implements View.OnClickListener {
         int temp = 0;
         switch (v.getId()) {
             case R.id.btn_calendar:
-                temp = REQUEST_PERMISSION_CALENDAR_CODE;
+                temp = PermissionUtils.REQUEST_PERMISSION_CALENDAR_CODE;
                 break;
             case R.id.btn_camera:
-                temp = REQUEST_PERMISSION_CAMERA_CODE;
+                temp = PermissionUtils.REQUEST_PERMISSION_CAMERA_CODE;
                 break;
             case R.id.btn_Contacts:
-                temp = REQUEST_PERMISSION_CONTACTS_CODE;
+                temp = PermissionUtils.REQUEST_PERMISSION_CONTACTS_CODE;
                 break;
             case R.id.btn_Location:
-                temp = REQUEST_PERMISSION_LOCATION_CODE;
+                temp = PermissionUtils.REQUEST_PERMISSION_LOCATION_CODE;
                 break;
             case R.id.btn_MicroPhone:
-                temp = REQUEST_PERMISSION_MICROPHONE_CODE;
+                temp = PermissionUtils.REQUEST_PERMISSION_MICROPHONE_CODE;
                 break;
             case R.id.btn_phone:
-                temp = REQUEST_PERMISSION_PHONE_CODE;
+                temp = PermissionUtils.REQUEST_PERMISSION_PHONE_CODE;
                 break;
             case R.id.btn_Sensors:
-                temp = REQUEST_PERMISSION_SENSORS_CODE;
+                temp = PermissionUtils.REQUEST_PERMISSION_SENSORS_CODE;
                 break;
             case R.id.btn_sms:
-                temp = REQUEST_PERMISSION_SMS_CODE;
+                temp = PermissionUtils.REQUEST_PERMISSION_SMS_CODE;
                 break;
             case R.id.btn_Storage:
-                temp = REQUEST_PERMISSION_STORAGE_CODE;
+                temp = PermissionUtils.REQUEST_PERMISSION_STORAGE_CODE;
                 break;
             case R.id.btn_saw:
                 requestAlertWindowPermission();
@@ -118,7 +93,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             default:
                 break;
         }
-        if (temp >= REQUEST_PERMISSION_CALENDAR_CODE && temp <= REQUEST_PERMISSION_STORAGE_CODE) {
+        if (temp >= PermissionUtils.REQUEST_PERMISSION_CALENDAR_CODE && temp <= PermissionUtils.REQUEST_PERMISSION_STORAGE_CODE) {
             requestRunTimePermissons(temp);
         }
     }
@@ -126,13 +101,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private void requestWriteSettings() {
         Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
         intent.setData(Uri.parse("package:" + getPackageName()));
-        startActivityForResult(intent, REQUEST_PERMISSION_WRITE_SETTINGS_CODE);
+        startActivityForResult(intent, PermissionUtils.REQUEST_PERMISSION_WRITE_SETTINGS_CODE);
     }
 
     private void requestAlertWindowPermission() {
         Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
         intent.setData(Uri.parse("package:" + getPackageName()));
-        startActivityForResult(intent, REQUEST_PERMISSION_SAW_CODE);
+        startActivityForResult(intent, PermissionUtils.REQUEST_PERMISSION_SAW_CODE);
     }
 
     //6.0以下系统自动授权
@@ -142,86 +117,123 @@ public class MainActivity extends Activity implements View.OnClickListener {
      */
     private void requestRunTimePermissons(int type) {
         switch (type) {
-            case REQUEST_PERMISSION_CALENDAR_CODE:
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.READ_CALENDAR}, REQUEST_PERMISSION_CALENDAR_CODE);
-                    return;
-                } else {
-                    System.out.println("日历组权限已经授权:>>>DoNext!");
-                }
+            case PermissionUtils.REQUEST_PERMISSION_CALENDAR_CODE:
+                PermissionUtils.checkPermission(this, Manifest.permission.READ_CALENDAR, PermissionUtils.REQUEST_PERMISSION_CALENDAR_CODE, new PermissionUtils.IPermissionGrantListener() {
+                    @Override
+                    public void onPermissionGranted() {
+                        readCalenda();
+                    }
+
+                    @Override
+                    public void onPermissionGrantedFailed() {
+                        Toast.makeText(MainActivity.this, "获取日历权限失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 break;
-            case REQUEST_PERMISSION_CAMERA_CODE:
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_PERMISSION_CAMERA_CODE);
-                    return;
-                } else {
-                    System.out.println("相机组权限已经授权:>>>DoNext!");
-                    openCamera();
-                }
+            case PermissionUtils.REQUEST_PERMISSION_CAMERA_CODE:
+                PermissionUtils.checkPermission(this, Manifest.permission.CAMERA, PermissionUtils.REQUEST_PERMISSION_CAMERA_CODE, new PermissionUtils.IPermissionGrantListener() {
+                    @Override
+                    public void onPermissionGranted() {
+                        openCamera();
+                    }
+
+                    @Override
+                    public void onPermissionGrantedFailed() {
+                        Toast.makeText(MainActivity.this, "获取相机权限失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 break;
-            case REQUEST_PERMISSION_CONTACTS_CODE:
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_PERMISSION_CONTACTS_CODE);
-                    return;
-                } else {
-                    System.out.println("通讯录组权限已经授权:>>>DoNext!");
-                    readContacts();
-                }
+            case PermissionUtils.REQUEST_PERMISSION_CONTACTS_CODE:
+                PermissionUtils.checkPermission(this, Manifest.permission.READ_CONTACTS, PermissionUtils.REQUEST_PERMISSION_CONTACTS_CODE, new PermissionUtils.IPermissionGrantListener() {
+                    @Override
+                    public void onPermissionGranted() {
+                        phone_grated = true;
+                        readContacts();
+                    }
+
+                    @Override
+                    public void onPermissionGrantedFailed() {
+                        Toast.makeText(MainActivity.this, "获取通讯录权限失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 break;
-            case REQUEST_PERMISSION_LOCATION_CODE:
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_LOCATION_CODE);
-                    return;
-                } else {
-                    System.out.println("定位组权限已经授权:>>>DoNext!");
-                    location();
-                }
+            case PermissionUtils.REQUEST_PERMISSION_LOCATION_CODE:
+                PermissionUtils.checkPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION, PermissionUtils.REQUEST_PERMISSION_LOCATION_CODE, new PermissionUtils.IPermissionGrantListener() {
+                    @Override
+                    public void onPermissionGranted() {
+                        location();
+                    }
+
+                    @Override
+                    public void onPermissionGrantedFailed() {
+                        Toast.makeText(MainActivity.this, "获取定位权限失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 break;
-            case REQUEST_PERMISSION_MICROPHONE_CODE:
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSION_MICROPHONE_CODE);
-                    return;
-                } else {
-                    System.out.println("麦克风组权限已经授权:>>>DoNext!");
-                    useMicrophone();
-                }
+            case PermissionUtils.REQUEST_PERMISSION_MICROPHONE_CODE:
+                PermissionUtils.checkPermission(this, Manifest.permission.RECORD_AUDIO, PermissionUtils.REQUEST_PERMISSION_MICROPHONE_CODE, new PermissionUtils.IPermissionGrantListener() {
+                    @Override
+                    public void onPermissionGranted() {
+                        useMicrophone();
+                    }
+
+                    @Override
+                    public void onPermissionGrantedFailed() {
+                        Toast.makeText(MainActivity.this, "获取麦克风权限失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 break;
-            case REQUEST_PERMISSION_PHONE_CODE:
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, REQUEST_PERMISSION_PHONE_CODE);
-                    return;
-                } else {
-                    System.out.println("电话组权限已经授权:>>>DoNext!");
-                    phone_grated = true;
-                    usePhone();
-                }
+            case PermissionUtils.REQUEST_PERMISSION_PHONE_CODE:
+                PermissionUtils.checkPermission(this, Manifest.permission.CALL_PHONE, PermissionUtils.REQUEST_PERMISSION_PHONE_CODE, new PermissionUtils.IPermissionGrantListener() {
+                    @Override
+                    public void onPermissionGranted() {
+                        usePhone();
+                    }
+
+                    @Override
+                    public void onPermissionGrantedFailed() {
+                        Toast.makeText(MainActivity.this, "获取电话权限失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 break;
-            case REQUEST_PERMISSION_SENSORS_CODE:
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BODY_SENSORS) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.BODY_SENSORS}, REQUEST_PERMISSION_SENSORS_CODE);
-                    return;
-                } else {
-                    System.out.println("人体传感器组权限已经授权:>>>DoNext!");
-                    useSensors();
-                }
+            case PermissionUtils.REQUEST_PERMISSION_SENSORS_CODE:
+                PermissionUtils.checkPermission(this, Manifest.permission.BODY_SENSORS, PermissionUtils.REQUEST_PERMISSION_SENSORS_CODE, new PermissionUtils.IPermissionGrantListener() {
+                    @Override
+                    public void onPermissionGranted() {
+                        useSensors();
+                    }
+
+                    @Override
+                    public void onPermissionGrantedFailed() {
+                        Toast.makeText(MainActivity.this, "获取身体传感器权限失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 break;
-            case REQUEST_PERMISSION_SMS_CODE:
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.SEND_SMS}, REQUEST_PERMISSION_SMS_CODE);
-                    return;
-                } else {
-                    System.out.println("短信组权限已经授权:>>>DoNext!");
-                    useSMS();
-                }
+            case PermissionUtils.REQUEST_PERMISSION_SMS_CODE:
+                PermissionUtils.checkPermission(this, Manifest.permission.SEND_SMS, PermissionUtils.REQUEST_PERMISSION_SMS_CODE, new PermissionUtils.IPermissionGrantListener() {
+                    @Override
+                    public void onPermissionGranted() {
+                        useSMS();
+                    }
+
+                    @Override
+                    public void onPermissionGrantedFailed() {
+                        Toast.makeText(MainActivity.this, "获取短信权限失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 break;
-            case REQUEST_PERMISSION_STORAGE_CODE:
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSION_STORAGE_CODE);
-                    return;
-                } else {
-                    System.out.println("存储组权限已经授权:>>>DoNext!");
-                    useSdCard();
-                }
+            case PermissionUtils.REQUEST_PERMISSION_STORAGE_CODE:
+                PermissionUtils.checkPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE, PermissionUtils.REQUEST_PERMISSION_STORAGE_CODE, new PermissionUtils.IPermissionGrantListener() {
+                    @Override
+                    public void onPermissionGranted() {
+                        useSdCard();
+                    }
+
+                    @Override
+                    public void onPermissionGrantedFailed() {
+                        Toast.makeText(MainActivity.this, "获取存储权限失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 break;
             default:
                 System.out.println("未定义运行时权限请求码！");
@@ -229,60 +241,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    /**
-     * 运行时权限请求处理
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode >= REQUEST_PERMISSION_CALENDAR_CODE && requestCode <= REQUEST_PERMISSION_SMS_CODE) {
-            int grantResult = grantResults[0];
-            boolean granted = grantResult == PackageManager.PERMISSION_GRANTED;
-            if (granted) {
-                System.out.println("权限授权成功:>>>DoNext!");
-                switch (requestCode) {
-                    case REQUEST_PERMISSION_CALENDAR_CODE:
-                        readCalenda();
-                        break;
-                    case REQUEST_PERMISSION_CAMERA_CODE:
-                        openCamera();
-                        break;
-                    case REQUEST_PERMISSION_CONTACTS_CODE:
-                        readContacts();
-                        break;
-                    case REQUEST_PERMISSION_LOCATION_CODE:
-                        location();
-                        break;
-                    case REQUEST_PERMISSION_MICROPHONE_CODE:
-                        useMicrophone();
-                        break;
-                    case REQUEST_PERMISSION_PHONE_CODE:
-                        usePhone();
-                        break;
-                    case REQUEST_PERMISSION_SENSORS_CODE:
-                        useSensors();
-                        break;
-                    case REQUEST_PERMISSION_SMS_CODE:
-                        useSMS();
-                        break;
-                    case REQUEST_PERMISSION_STORAGE_CODE:
-                        useSdCard();
-                        break;
-                    default:
-                        System.out.println("未定义运行时权限请求码！");
-                        break;
-                }
-            } else {
-                System.out.println("权限授权失败!");
-                this.finish();
-            }
-        } else {
-            System.out.println("运行时权限请求码不对！");
-        }
-    }
 
     private void readCalenda() {
-
     }
 
     private void openCamera() {
@@ -328,13 +288,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_PERMISSION_SAW_CODE) {
+        if (requestCode == PermissionUtils.REQUEST_PERMISSION_SAW_CODE) {
             if (Settings.canDrawOverlays(this)) {
                 System.out.println("权限SYSTEM_ALERT_WINDOW授权成功:==>DoNext！");
             } else {
                 System.out.println("权限SYSTEM_ALERT_WINDOW失败！");
             }
-        } else if (requestCode == REQUEST_PERMISSION_WRITE_SETTINGS_CODE) {
+        } else if (requestCode == PermissionUtils.REQUEST_PERMISSION_WRITE_SETTINGS_CODE) {
             if (Settings.System.canWrite(this)) {
                 System.out.println("权限WRITE_SETTINGS授权成功:==>DoNext！");
             } else {
@@ -343,16 +303,4 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (phone_grated) {
-            readContacts();
-        }
-    }
 }
