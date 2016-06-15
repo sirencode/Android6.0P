@@ -1,11 +1,43 @@
-Android 6.0 权限适配问题
+#Android 6.0 权限适配问题
 
-1 项目权限分类：
-    1.1 一般权限，只需要声明一下就可以使用。
-    1.2 特殊权限，声明加运行时处理。
-    1.3 危险权限，在运行时动态申请。
-2 权限分类参考表
-    2.1 一般权限
+##1 权限分类：
+    1.1 一般权限，生命即可使用，无需做特殊处理。
+    1.2 特殊权限，需要动态授权。
+    1.3 危险权限，也成运行时权限，需要动态的在使用时授权，如果未授权直接使用会导致崩溃。
+
+##2 建议
+    2.1 添加权限时请分类添加，可分为一般权限，运行时权限和特殊权限
+        一般权限：
+	    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+	    <uses-permission android:name="android.permission.INTERNET"/>
+	    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+	    <uses-permission android:name="android.permission.VIBRATE"/>
+	    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+	    <uses-permission android:name="getui.permission.GetuiService.com.baidao.ytxmobile"/>
+	    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+	    <uses-permission android:name="android.permission.GET_TASKS"/>
+	    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+	    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+        特殊权限：
+        <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+        危险权限：(运行时权限)
+        //Phone组
+        <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+        //MicroPhone 麦克风组
+        <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+        //CAMERA 相机组
+        <uses-permission android:name="android.permission.CAMERA"/>
+        //Location  定位组
+        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+        //STORAGE  存储组
+        <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    2.2 处理要用到运行是权限或者特殊权限的方法时，尽量将方法写在Activity或者fragment里面。
+    2.3 设计时请设计好，当用户拒绝相关权限后的处理方式。
+
+##3 权限分类参考表
+    3.1 一般权限
         ACCESS_LOCATION_EXTRA_COMMANDS
 		ACCESS_NETWORK_STATE
 		ACCESS_NOTIFICATION_POLICY
@@ -39,10 +71,10 @@ Android 6.0 权限适配问题
 		VIBRATE
 		WAKE_LOCK
 		WRITE_SYNC_SETTINGS
-    2.2 特殊权限
+    3.2 特殊权限
         SYSTEM_ALERT_WINDOW，设置悬浮窗，进行一些黑科技
 		WRITE_SETTINGS 修改系统设置
-    2.3 危险权限
+    3.3 危险权限
         Permission Group	Permissions
 		CALENDAR
 							READ_CALENDAR
@@ -77,9 +109,4 @@ Android 6.0 权限适配问题
 		STORAGE
 							READ_EXTERNAL_STORAGE
 							WRITE_EXTERNAL_STORAGE
-
-
-
-
-
 
