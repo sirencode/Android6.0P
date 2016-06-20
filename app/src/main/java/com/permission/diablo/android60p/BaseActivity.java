@@ -36,4 +36,9 @@ public class BaseActivity extends Activity {
             permissionGrantListener.onPermissionGranted();
         }
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
 }

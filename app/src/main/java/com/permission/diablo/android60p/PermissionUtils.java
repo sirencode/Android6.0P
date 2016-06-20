@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.support.v4.app.ActivityCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +29,7 @@ public class PermissionUtils {
     @TargetApi(Build.VERSION_CODES.M)
     public static void checkPermission(Activity activity, String permission, int code,IPermissionGrantListener permissionGrantListener){
         BaseActivity.setIPermissionGrantListener(permissionGrantListener);
-        if (ActivityCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED) {
+        if (activity.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
             activity.requestPermissions(new String[]{permission}, code);
             return;
         } else {
